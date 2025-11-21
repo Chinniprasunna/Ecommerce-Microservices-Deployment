@@ -1,0 +1,276 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fullstack-app
+---
+# ===========================
+# MySQL Deployment & Service
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+  namespace: fullstack-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_DATABASE
+              value: ecommercedb
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: fullstack-app
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: ClusterIP
+---
+# ===========================
+# Eureka Server Deployment
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-deployment
+  namespace: fullstack-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka
+  template:
+    metadata:
+      labels:
+        app: eureka
+    spec:
+      containers:
+        - name: eureka
+          image: chinniprasunna/eureka-server:latest
+          ports:
+            - containerPort: 8761
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-service
+  namespace: fullstack-app
+spec:
+  selector:
+    app: eureka
+  ports:
+    - port: 8761
+      targetPort: 8761
+      nodePort: 30761
+  type: NodePort
+---
+# ===========================
+# API Gateway Deployment
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apigateway-deployment
+  namespace: fullstack-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apigateway
+  template:
+    metadata:
+      labels:
+        app: apigateway
+    spec:
+      containers:
+        - name: apigateway
+          image: chinniprasunna/api-gateway:latest
+          ports:
+            - containerPort: 2000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apigateway-service
+  namespace: fullstack-app
+spec:
+  selector:
+    app: apigateway
+  ports:
+    - port: 2000
+      targetPort: 2000
+      nodePort: 30020
+  type: NodePort
+---
+# ===========================
+# Admin Service Deployment
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-deployment
+  namespace: fullstack-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      containers:
+        - name: admin
+          image: chinniprasunna/admin-service:latest
+          ports:
+            - containerPort: 8081
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+  namespace: fullstack-app
+spec:
+  selector:
+    app: admin
+  ports:
+    - port: 8081
+      targetPort: 8081
+  type: ClusterIP
+---
+# ===========================
+# Customer Service Deployment
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-deployment
+  namespace: fullstack-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer
+  template:
+    metadata:
+      labels:
+        app: customer
+    spec:
+      containers:
+        - name: customer
+          image: chinniprasunna/customer-service:latest
+          ports:
+            - containerPort: 8082
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-service
+  namespace: fullstack-app
+spec:
+  selector:
+    app: customer
+  ports:
+    - port: 8082
+      targetPort: 8082
+  type: ClusterIP
+---
+# ===========================
+# Seller Service Deployment
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seller-deployment
+  namespace: fullstack-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seller
+  template:
+    metadata:
+      labels:
+        app: seller
+    spec:
+      containers:
+        - name: seller
+          image: chinniprasunna/seller-service:latest
+          ports:
+            - containerPort: 8083
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seller-service
+  namespace: fullstack-app
+spec:
+  selector:
+    app: seller
+  ports:
+    - port: 8083
+      targetPort: 8083
+  type: ClusterIP
+---
+# ===========================
+# Frontend Deployment
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: fullstack-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: chinniprasunna/frontend:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: fullstack-app
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+  type: NodePort
